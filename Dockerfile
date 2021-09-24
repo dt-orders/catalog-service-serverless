@@ -1,4 +1,5 @@
-FROM openjdk:15
+FROM openjdk:11
+
 COPY target/*.jar .
 COPY target/MANIFEST .
 
@@ -8,4 +9,4 @@ ENV APP_VERSION=$APP_VERSION
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "cat MANIFEST && /usr/bin/java -Xmx400m -Xms400m -jar *.jar"]
+CMD ["sh", "-c", "/usr/local/openjdk-11/bin/java -Xmx400m -Xms400m -jar *.jar"]
