@@ -16,6 +16,7 @@ import java.io.*;
 
 import com.ewolff.microservice.catalog.Item;
 import com.ewolff.microservice.catalog.ItemRepository;
+import com.ewolff.microservice.catalog.ServerlessConnect;
 
 
 @Controller
@@ -24,6 +25,9 @@ public class CatalogController {
 	private String version;
 
 	private final ItemRepository itemRepository;
+
+    @Autowired
+    private ServerlessConnect serverlessConnect = new ServerlessConnect();
 
 	private String getVersion() {
 		System.out.println("Current APP_VERSION: " + this.version);
@@ -43,12 +47,12 @@ public class CatalogController {
 
 	@RequestMapping(value = "/{id}.html", method = RequestMethod.GET, produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView Item(@PathVariable("id") long id) {
-		return new ModelAndView("item", "item", itemRepository.findById(id).get());
+		return new ModelAndView("item", "item", serverlessConnect.findById(id));
 	}
 
 	@RequestMapping("/list.html")
 	public ModelAndView ItemList() {
-		return new ModelAndView("itemlist", "items", itemRepository.findAll());
+		return new ModelAndView("itemlist", "items", serverlessConnect.findAll());
 	}
 
 	@RequestMapping(value = "/form.html", method = RequestMethod.GET)
@@ -57,15 +61,14 @@ public class CatalogController {
 	}
 
 	@RequestMapping(value = "/form.html", method = RequestMethod.POST)
-	public ModelAndView post(Item Item) {
-		Item = itemRepository.save(Item);
+	public ModelAndView post(Item item) {
+		serverlessConnect.insertItem(item);
 		return new ModelAndView("success");
 	}
 
 	@RequestMapping(value = "/{id}.html", method = RequestMethod.PUT)
 	public ModelAndView put(@PathVariable("id") long id, Item item) {
-		item.setId(id);
-		itemRepository.save(item);
+		serverlessConnect.updateItemById(item);
 		return new ModelAndView("success");
 	}
 
@@ -77,12 +80,12 @@ public class CatalogController {
 	@RequestMapping(value = "/searchByName.html", produces = MediaType.TEXT_HTML_VALUE)
 	public ModelAndView search(@RequestParam("query") String query) {
 		return new ModelAndView("itemlist", "items",
-				itemRepository.findByNameContaining(query));
+				serverlessConnect.findByNameContains(query));
 	}
 
 	@RequestMapping(value = "/{id}.html", method = RequestMethod.DELETE)
 	public ModelAndView delete(@PathVariable("id") long id) {
-		itemRepository.deleteById(id);
+		serverlessConnect.deleteItemById(id);
 		return new ModelAndView("success");
 	}
 
